@@ -1,0 +1,39 @@
+# Clear screen
+alias c="clear"
+
+# Flush DNS
+alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder; sudo killall mDNSResponderHelper;"
+
+# List all files colorized using long format
+alias l="ls -laF"
+
+# Get current IP Address
+alias ip="curl https://diagnostic.opendns.com/myip ; echo"
+
+# PHP
+alias phpunit="vendor/bin/phpunit"
+alias p="phpunit"
+alias pf="phpunit --filter "
+alias pp="php artisan test --parallel"
+alias phpcsfixer="php-cs-fixer fix --config=.php_cs --allow-risky=yes"
+alias cu="composer update"
+alias cup="composer upgrade "
+alias ci="composer install"
+alias cda="composer dump-autoload -o"
+alias art="php artisan"
+alias mfs="art migrate:fresh --seed"
+
+# Git
+alias gs="git status"
+alias gc="git checkout"
+alias gcm="git checkout master"
+alias gcd="git checkout develop"
+alias gcb="git checkout -b"
+alias gpo="git push origin"
+alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias pull="git pull --no-edit"
+alias merge="git merge --no-edit"
+
+# Show/hide hidden files in Finder
+alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder && open -g /System/Library/CoreServices/Finder.app"
+alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder && open -g /System/Library/CoreServices/Finder.app"

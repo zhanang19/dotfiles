@@ -1,0 +1,67 @@
+# Create a new directory and enter to it
+function mkd() {
+    mkdir -p "$@" && cd "$@"
+}
+
+# Create a new directory, enter to it and open using VS Code
+function mcd() {
+    mkdir -p "$@" && cd "$@" && code .
+}
+
+# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
+# the `.git` directory, listing directories first. The output gets piped into
+# `less` with options to preserve color and line numbers, unless the output is
+# small enough for one screen.
+function tre() {
+	tree -aC -I '.git|vendor|node_modules|bower_components' --dirsfirst "$@" | less -FRNX
+}
+
+function png2jpg() {
+    for i in *.png; do sips -s format jpeg -s formatOptions 70 "${i}" --out "${i%png}jpg"; done
+}
+
+function opendb () {
+    [ ! -f .env ] && { echo "No .env file found."; exit 1; }
+
+    DB_CONNECTION=$(grep DB_CONNECTION .env | grep -v -e '^\s*#' | cut -d '=' -f 2-)
+    DB_HOST=$(grep DB_HOST .env | grep -v -e '^\s*#' | cut -d '=' -f 2-)
+    DB_PORT=$(grep DB_PORT .env | grep -v -e '^\s*#' | cut -d '=' -f 2-)
+    DB_DATABASE=$(grep DB_DATABASE .env | grep -v -e '^\s*#' | cut -d '=' -f 2-)
+    DB_USERNAME=$(grep DB_USERNAME .env | grep -v -e '^\s*#' | cut -d '=' -f 2-)
+    DB_PASSWORD=$(grep DB_PASSWORD .env | grep -v -e '^\s*#' | cut -d '=' -f 2-)
+
+    DB_URL="${DB_CONNECTION}://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}"
+
+    echo "Opening ${DB_URL}"
+    open $DB_URL
+}
+
+function db () {
+    opendb
+}
+
+function createdb {
+    set -e
+    PASS=`pwgen -s 40 1`
+
+    mysql -uroot -p <<MYSQL_SCRIPT
+    CREATE DATABASE $1;
+    CREATE USER '$1'@'localhost' IDENTIFIED BY '$PASS';
+    GRANT ALL PRIVILEGES ON $1.* TO '$1'@'localhost';
+    FLUSH PRIVILEGES;
+MYSQL_SCRIPT
+
+    echo "MySQL db & user created."
+    echo "Username:   $1"
+    echo "Password:   $PASS"
+}
+
+function deletedb {
+    set -e
+    mysql -uroot -p <<MYSQL_SCRIPT
+    DROP DATABASE $1;
+    DROP USER '$1'@'localhost';
+MYSQL_SCRIPT
+
+    echo "MySQL db & user deleted."
+}
