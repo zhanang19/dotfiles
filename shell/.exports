@@ -17,5 +17,4 @@ export GREP_OPTIONS="--color=auto"
 
 # Export extra Path
 export PATH="$HOME/.composer/vendor/bin:$PATH"
-export PATH="/usr/local/opt/protobuf@3.7/bin:$PATH"
-export PATH="/usr/local/opt/mysql@5.7/bin:$PATH"
+export PATH="/usr/local/sbin:$PATH"

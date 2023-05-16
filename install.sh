@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # The mere presence of this file in the home directory disables the system
 # copyright notice, the date and time of the last login, the message of the
 # day as well as other information that may otherwise appear on login.
@@ -8,10 +10,11 @@ touch $HOME/.hushlogin
 
 echo 'Install oh-my-zsh'
 rm -rf $HOME/.oh-my-zsh
-curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh
+curl -o- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash
 
-echo 'Install some zsh plugin'
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+echo 'Install powerlevel10k'
+POWERLEVEL10K_DIR=${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $POWERLEVEL10K_DIR
 
 echo 'Updating configuration...'
 # Add global gitignore
@@ -27,35 +30,40 @@ ln -s $HOME/dotfiles/shell/.curlrc $HOME/.curlrc
 rm $HOME/.zshrc
 ln -s $HOME/dotfiles/shell/.zshrc $HOME/.zshrc
 
+# Add zsh configuration
+rm $HOME/.p10k.zsh
+ln -s $HOME/dotfiles/shell/.p10k.zsh $HOME/.p10k.zsh
+
 # Add Mackup configuration
 rm $HOME/.mackup.cfg
 ln -s $HOME/dotfiles/macos/.mackup.cfg $HOME/.mackup.cfg
 
-echo 'Install composer'
-EXPECTED_CHECKSUM="$(php -r 'copy("https://composer.github.io/installer.sig", "php://stdout");')"
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-ACTUAL_CHECKSUM="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
-
-if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]
-then
-    >&2 echo 'ERROR: Invalid composer installer checksum'
-    rm composer-setup.php
-    exit 1
-fi
-
-php composer-setup.php --quiet
-rm composer-setup.php
-mv composer.phar /usr/local/bin/composer
+echo 'Setup git user'
+git config --global user.name "Zainal Hasan"
+git config --global user.email "19884603+zhanang19@users.noreply.github.com"
 
 echo 'Install homebrew'
-sudo rm -rf /usr/local/Cellar /usr/local/.git && brew cleanup
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+if ! command -v brew &> /dev/null
+then
+  sudo rm -rf /usr/local/Cellar /usr/local/.git
+  NONINTERACTIVE=1 curl -o- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+echo 'Install zsh plugin'
+brew install zsh-autosuggestions
+
+echo 'Install rbenv'
+brew install rbenv ruby-build
 
 echo 'Install Node JS'
 brew install node@16
 
 echo 'Install NVM'
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+[ -s "$NVM_DIR/nvm.sh" ] || curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+echo 'Install pnpm'
+brew install pnpm
 
 echo 'Install pkg-config'
 brew install pkg-config
@@ -66,30 +74,43 @@ brew install wget
 echo 'Install ack'
 brew install ack
 
-echo 'Install brew-cask'
-brew tap homebrew/cask-cask
-brew install brew-cask
-
-echo 'Install php 7.* versions'
+echo 'Install php'
 brew tap shivammathur/php
 brew install shivammathur/php/php@7.2
 brew install shivammathur/php/php@7.4
 brew install shivammathur/php/php@8.1
+brew link --overwrite --force php@8.1
 
 echo 'Install imagemagick'
 brew install imagemagick
 
 echo 'Install imagick'
-pecl install imagick
+pecl info imagick || pecl install imagick
 
 echo 'Install memcached'
-pecl install memcached
-
-echo 'Install xdebug'
-pecl install xdebug
+pecl info memcached || pecl install --configureoptions 'with-zlib-dir="$(brew --prefix zlib)" with-libmemcached-dir="$(brew --prefix libmemcached)" enable-memcached-protocol="no" enable-memcached-sasl="yes" enable-memcached-session="yes" enable-memcached-igbinary="no" enable-memcached-msgpack="no" enable-memcached-json="no" enable-memcached-zstd="no" with-system-fastlz="no"' memcached
 
 echo 'Install redis'
-pecl install redis
+pecl info redis || pecl install --configureoptions 'enable-redis-igbinary="no" enable-redis-lzf="no" enable-redis-zstd="no" enable-redis-msgpack="no" enable-redis-lz4="no"' redis
+
+echo 'Install composer'
+if ! command -v composer &> /dev/null
+then
+  EXPECTED_CHECKSUM="$(php -r 'copy("https://composer.github.io/installer.sig", "php://stdout");')"
+  php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  ACTUAL_CHECKSUM="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
+
+  if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]
+  then
+    >&2 echo 'ERROR: Invalid composer installer checksum'
+    rm composer-setup.php
+    exit 1
+  fi
+
+  php composer-setup.php --quiet
+  rm composer-setup.php
+  mv composer.phar /usr/local/bin/composer
+fi
 
 echo 'Install laravel valet'
 composer global require laravel/valet
@@ -99,7 +120,7 @@ echo 'Install mackup'
 brew install mackup
 
 echo 'Install some useful QuickLook plugins'
-brew install --cask qlcolorcode qlstephen qlmarkdown quicklook-json qlimagesize qlvideo
+brew install --cask qlstephen qlmarkdown quicklook-json qlimagesize qlvideo
 brew install --cask quicklook-csv webpquicklook
 
 echo 'Install Visual Studio Code'
@@ -107,6 +128,9 @@ brew install --cask visual-studio-code
 
 echo 'Install Sublime Text'
 brew install --cask sublime-text
+
+echo 'Install iTerm2'
+brew install --cask iterm2
 
 echo 'Install Github'
 brew install --cask github
@@ -119,9 +143,6 @@ brew install --cask anydesk
 
 echo 'Install WhatsApp'
 brew install --cask whatsapp
-
-echo 'Install Bitwarden'
-brew install --cask bitwarden
 
 echo 'Install Raycast'
 brew install --cask raycast
@@ -158,18 +179,12 @@ echo 'Install font to ensure terminal displayed correctly'
 cp -vf "fonts/Droid Sans Mono for Powerline.otf" "$HOME/Library/Fonts/"
 cp -vf "fonts/Menlo-Powerline.otf" "$HOME/Library/Fonts/"
 
-echo 'Instal custom agnoster theme'
-ln -s "shell/zsh-theme/agnoster.zsh-theme" "$ZSH/custom/themes/"
-
 echo 'All done!'
 
 echo 'There is some application that need to installed manually!'
 
 echo 'Download Figmac'
 open "https://figmac.com/download/Figmac.zip"
-
-# echo 'Install Lightshot Screenshot'
-# open "https://apps.apple.com/us/app/lightshot-screenshot/id526298438"
 
 echo ''
 echo ''

@@ -14,6 +14,18 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 
+# Enable dark mode
+defaults write NSGlobalDomain AppleInterfaceStyle -string "Dark"
+
+# Don't use natural scrolling
+defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+
+# Don't minimize on double click window
+defaults write NSGlobalDomain AppleMiniaturizeOnDoubleClick -bool false
+
+# Display time in format 24 hour
+defaults write NSGlobalDomain AppleICUForce24HourTime -bool true
+
 # Expand save panel by default
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
@@ -96,10 +108,11 @@ defaults write com.apple.frameworks.diskimages skip-verify -bool true
 defaults write com.apple.frameworks.diskimages skip-verify-locked -bool true
 defaults write com.apple.frameworks.diskimages skip-verify-remote -bool true
 
-# Use list view in all Finder windows by default
-# Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`
+# Use column view in all Finder windows by default
 defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
+# Always show status bar
+defaults write com.apple.finder ShowStatusBar -bool true
 
 ###############################################################################
 # Dock, Dashboard, and hot corners                                            #
@@ -107,6 +120,9 @@ defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
 # Set the icon size of Dock items to 31 pixels
 defaults write com.apple.dock tilesize -int 31
+
+# Set the magnification icon size of Dock items to 90 pixels
+defaults write com.apple.dock largesize -int 90
 
 # Hide indicator lights for open applications in the Dock
 defaults write com.apple.dock show-process-indicators -bool false
@@ -169,6 +185,8 @@ defaults write com.apple.ActivityMonitor SortDirection -int 0
 
 for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
 	"Dock" "Finder" "Safari" "SizeUp" "SystemUIServer" \
-	"Terminal" "Transmission" "Twitter" "iCal"; do
+	"Terminal" "iCal"; do
 	killall "${app}" > /dev/null 2>&1
 done
+
+echo 'Done!'
