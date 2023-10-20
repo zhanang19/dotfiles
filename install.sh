@@ -38,7 +38,8 @@ ln -s $HOME/dotfiles/shell/.p10k.zsh $HOME/.p10k.zsh
 rm $HOME/.mackup.cfg
 ln -s $HOME/dotfiles/macos/.mackup.cfg $HOME/.mackup.cfg
 
-echo 'Setup git user'
+echo 'Setup git'
+git config --global core.fileMode false
 git config --global user.name "Zainal Hasan"
 git config --global user.email "19884603+zhanang19@users.noreply.github.com"
 
@@ -52,6 +53,10 @@ fi
 
 echo 'Install zsh plugin'
 brew install zsh-autosuggestions
+
+echo 'Instal git credential manager'
+brew tap microsoft/git
+brew install --cask git-credential-manager-core
 
 echo 'Install rbenv'
 brew install rbenv ruby-build
@@ -76,10 +81,9 @@ brew install ack
 
 echo 'Install php'
 brew tap shivammathur/php
-brew install shivammathur/php/php@7.2
-brew install shivammathur/php/php@7.4
 brew install shivammathur/php/php@8.1
-brew link --overwrite --force php@8.1
+brew install shivammathur/php/php@8.2
+brew link --overwrite --force php@8.2
 
 echo 'Install imagemagick'
 brew install imagemagick
@@ -120,7 +124,7 @@ echo 'Install mackup'
 brew install mackup
 
 echo 'Install some useful QuickLook plugins'
-brew install --cask qlstephen qlmarkdown quicklook-json qlimagesize qlvideo
+brew install --cask qlstephen quicklook-json qlimagesize qlvideo
 brew install --cask quicklook-csv webpquicklook
 
 echo 'Install Visual Studio Code'
@@ -132,26 +136,14 @@ brew install --cask sublime-text
 echo 'Install iTerm2'
 brew install --cask iterm2
 
-echo 'Install Github'
-brew install --cask github
-
 echo 'Install Firefox'
 brew install --cask firefox
-
-echo 'Install Anydesk'
-brew install --cask anydesk
-
-echo 'Install WhatsApp'
-brew install --cask whatsapp
 
 echo 'Install Raycast'
 brew install --cask raycast
 
 echo 'Install Tableplus'
 brew install --cask tableplus
-
-echo 'Install Dropbox'
-brew install --cask dropbox
 
 echo 'Install Zappy'
 brew install --cask zappy
@@ -171,9 +163,8 @@ brew install --cask appcleaner
 echo 'Install Camo Studio'
 brew install --cask camo-studio
 
-echo 'Install Dracula theme for Terminal'
-brew tap dracula/install
-brew install --cask dracula-terminal
+echo 'Install The Unarchiver'
+brew install --cask the-unarchiver
 
 echo 'Install font to ensure terminal displayed correctly'
 cp -vf "fonts/Droid Sans Mono for Powerline.otf" "$HOME/Library/Fonts/"
